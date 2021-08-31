@@ -28,24 +28,59 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 app.use(express.json());
+
+app.get('/', (req, res) =>{
+    res.json('Super Heroes');
+});
+app.get('/heroes',(req, res)=> {
+    res.json(superHeroes.map(hero=> hero.name));
+  });
+  
+app.get('/heroes/:name',(req, res, next)=> {
+      res.json(superHeroes.filter(heroes=> heroes.name === req.params.name))
+      
+    });
+    
+app.get('/heroes/:name/power',(req, res) =>{
+        const heroesPower=superHeroes.filter(heroes=> heroes.name === req.params.name);
+        res.json(heroesPower.map(hero=> hero.power))
+      });
+
+app.post('/heroes', transformName, (req, res)=> {
+    const request1= req.body;
+    superHeroes.push(request1);
+   res.send('ok heros, ajouté')
+
+  });   
+app.patch('/heroes/:name/power',(req,res)=>{
+
+    const heroess= superHeroes.find(heroes=> heroes.name === req.params.name);
+    if (heroess) {
+        const newPower = req.body.power;
+        heroess.power.push(newPower);
+    res.send("Pouvoir ajouté!")
+    }
+})
+    
+function transformName(req,res, next){
+    if (req.body.name === undefined) {
+        error:"add name"
+    }
+    req.body.name =req.body.name.toLowerCase();
+    next();
+}
+
 // Middlewares globaux
-app.use((req, res, next) => {
-	console.log("Premier middleware");
+const debug=(req,res,next)=>{
+    console.log("server")
+    next()
+}
+app.use(debug);
 
-	next();
-});
 
-app.get('/', function(req, res) {
-    res.send('Super Heroes');
-});
 app.get('*', function(req, res) {
     res.send('All routes - Erreur 404');
 });
-
-app.get('/heroes', function(req, res) {
-    const listNames= superHeroes.map(a=>a.name) ;
-    res.send(`${listNames}`)
-  });
 
 //app listener
 app.listen(PORT, () => {
