@@ -9,7 +9,7 @@ router.get("/:id", hotelController.hotelId);
 
 router.post("/", hotelController.addHotel);
 
-router.put("/:id?name=newName", hotelController.putId);
+router.put("/:id", hotelController.putId);
 
 router.delete("/:id", hotelController.deleteHotel);
 

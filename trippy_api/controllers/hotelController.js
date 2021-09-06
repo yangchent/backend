@@ -1,5 +1,6 @@
 const express =require('express');
 
+
 const hotels= [
     {
 		"id": 1,
@@ -65,20 +66,36 @@ const addHotel= (req, res) => {
     }
 //put hotel
    const putId =(req,res)=> {
-        const idHotel= req.params;
-        res.json({
+
+    const name1 =req.query.name;
+    const idHotel= req.params.id;
+
+        const hotelId = hotels.findIndex(hotel => hotel.id === parseInt(idHotel));
+          
+            const hotelIndex= hotels[hotelId+1] ;
+            hotelIndex.name= name1;
+        
+         hotels.splice( hotelId,1,hotelIndex)
+           
+            res.json({
                 status: "ok",
-                data: idHotel,
+                message: "Hotel name changed",
+                data : hotelId
             })
-        }
+    }
 //Delete hotel by id
     const deleteHotel =(req, res) => {
-        const name= req.params.name;
 
-        let hotel1= hotels.filter(a => a.name===name);
+        const idHotel= req.params.id;
+
+    const hotelId = hotels.findIndex(hotel => hotel.id === parseInt(idHotel));
+      
+      hotels.splice(hotelId, 1);
+
         res.json({
             status : 'ok',
-            data: [hotel1],
+            message: "hotel name deleted",
+            data: hotels
         })
     };
 module.exports = {
