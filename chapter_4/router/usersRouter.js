@@ -7,6 +7,8 @@ router.get("/", usersController.user);
 
 router.post("/users", usersController.addUser);
 
-router.get("/users/:userName", usersController.a);
+router.get("/users/:userName", usersController.randomUserName);
+
+router.get("/users/id/:id", usersController.id);
 
 module.exports = router;

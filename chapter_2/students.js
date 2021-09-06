@@ -22,21 +22,26 @@ var students = [
 ]
 const express = require('express');
 const app = express();
+app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('Students');
+    res.json({status :'ok',
+            data : students});
 });
 
 app.get('/students', (req, res) => {
     const listNames= students.map(a=>a.name) ;
-    res.send(`${listNames}`)
+    res.json(listNames)
   });
-    
-
 
 app.post('/students', (req, res) => {
-    const listSurNames= students.map(a=>a.surname) ;
-    res.send(`${listSurNames}`)
+    const newStudent= req.body;
+    students.push(newStudent)
+    res.json({
+        status: "ok",
+        message: "new student added",
+        data: newStudent,
+    })
   });
 
 

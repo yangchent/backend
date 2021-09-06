@@ -31,20 +31,15 @@ app.get('/', (req, res) => {
   //exercise 2
 app.get('/authors/:id', (req, res) => {
     let nameA = req.params.id;
-    let nameB = nameA ;
-    res.send(`${authors[nameB].name}, ${authors[nameB].nationality}`)
+    res.send(`${authors[nameA].name}, ${authors[nameA].nationality}`)
   });
 
 
 //exercise 3
 app.get('/authors/:id/books', (req, res) => {
     let nameA = req.params.id;
-    let nameB = nameA ;
-    res.send(`${authors[nameB].books}`)
+    res.send(`${authors[nameA].books}`)
   });
-
-//exercise 4
-
 
 //app listener
 app.listen(3000, () => {

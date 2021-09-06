@@ -27,41 +27,61 @@ var superHeroes= [
 const express = require('express');
 const app = express();
 const PORT = 3000;
+const debug = require('.debug/');
 app.use(express.json());
 
-app.get('/', (req, res) =>{
-    res.json('Super Heroes');
+// Middlewares globaux
+app.use(debug);
+
+app.get('/heroes', (req, res) =>{
+    res.json({
+        status: 'ok',
+        data: SuperHeroes});
 });
-app.get('/heroes',(req, res)=> {
-    res.json(superHeroes.map(hero=> hero.name));
-  });
   
-app.get('/heroes/:name',(req, res, next)=> {
-      res.json(superHeroes.filter(heroes=> heroes.name === req.params.name))
-      
+app.get('/heroes/:name',(req, res)=> {
+    const name= req.params.name;
+    let hero= heroes.filter(
+        (obj)=> obj.name.toLowerCase().replace(" ", ""))===name.toLowerCase();
+      res.json({
+          status : 'ok',
+          data: [hero],
+      })
     });
     
 app.get('/heroes/:name/power',(req, res) =>{
-        const heroesPower=superHeroes.filter(heroes=> heroes.name === req.params.name);
-        res.json(heroesPower.map(hero=> hero.power))
-      });
+    const name= req.params.name;
+    let hero= heroes.filter(
+        (obj)=> obj.name.toLowerCase().replace(" ", ""))===name.toLowerCase();
+      res.json({
+          status : 'ok',
+          HeroName: hero,
+          data: hero.power,
+      })
+      
+    });
 
 app.post('/heroes', transformName, (req, res)=> {
     const request1= req.body;
     superHeroes.push(request1);
-   res.send('ok heros, ajouté')
+   res.json({message : 'ok heros, ajouté'})
 
   });   
 app.patch('/heroes/:name/power',(req,res)=>{
+    const name= req.params.name;
 
-    const heroess= superHeroes.find(heroes=> heroes.name === req.params.name);
+    let heroess= heroes.filter(
+        (obj)=> obj.name.toLowerCase().replace(" ", ""))===name.toLowerCase();
     if (heroess) {
         const newPower = req.body.power;
         heroess.power.push(newPower);
-    res.send("Pouvoir ajouté!")
+    res.json({
+        status : "ok",
+        message :"Pouvoir ajouté!",
+        data : heroess,
+    })
     }
-})
-    
+});
 function transformName(req,res, next){
     if (req.body.name === undefined) {
         error:"add name"
@@ -69,14 +89,6 @@ function transformName(req,res, next){
     req.body.name =req.body.name.toLowerCase();
     next();
 }
-
-// Middlewares globaux
-const debug=(req,res,next)=>{
-    console.log("server")
-    next()
-}
-app.use(debug);
-
 
 app.get('*', function(req, res) {
     res.send('All routes - Erreur 404');
