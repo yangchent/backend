@@ -26,33 +26,60 @@ var superHeroes= [
 ]
 const express = require('express');
 const app = express();
-const PORT = 3000;
-const debug = require('.debug/');
+const debug = require('./debug');
 app.use(express.json());
 
+//dotenv
+const dotenv = require("dotenv");
+dotenv.config({
+	path: "../../config.env",
+});
+const mongoose = require("mongoose");
+
+//connetion to mongoose
+mongoose
+	.connect(process.env.DB, {
+		useNewUrlParser: true,
+	})
+	.then(() => {
+		console.log("Connected to MongoDB !");
+	});
+
+  //Mongoose Schema 
+  const HeroSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      required: true,
+    },
+    power:{
+      type: String,
+    },
+  });
+  const Hero = mongoose.model("Hero", HeroSchema);
 // Middlewares globaux
 app.use(debug);
 
-app.get('/heroes', (req, res) =>{
+app.get('/heroes', (_req, res) =>{
     res.json({
         status: 'ok',
-        data: SuperHeroes});
+        data: superHeroes});
 });
   
 app.get('/heroes/:name',(req, res)=> {
-    const name= req.params.name;
-    let hero= heroes.filter(
-        (obj)=> obj.name.toLowerCase().replace(" ", ""))===name.toLowerCase();
+    const nameHero= req.params.name;
+
+    const hero= superHeroes.find(
+        (obj)=> obj.name.toLowerCase().replace(" ", "")) === nameHero.toLowerCase();
       res.json({
           status : 'ok',
-          data: [hero],
+          data:hero,
       })
     });
     
 app.get('/heroes/:name/power',(req, res) =>{
-    const name= req.params.name;
-    let hero= heroes.filter(
-        (obj)=> obj.name.toLowerCase().replace(" ", ""))===name.toLowerCase();
+    const nameHero= req.params.name;
+    const hero= superHeroes.find(
+        (obj)=> obj.name.toLowerCase().replace(" ", ""))===nameHero.toLowerCase();
       res.json({
           status : 'ok',
           HeroName: hero,
@@ -64,14 +91,15 @@ app.get('/heroes/:name/power',(req, res) =>{
 app.post('/heroes', transformName, (req, res)=> {
     const request1= req.body;
     superHeroes.push(request1);
+    console.log(request1)
    res.json({message : 'ok heros, ajouté'})
 
   });   
 app.patch('/heroes/:name/power',(req,res)=>{
-    const name= req.params.name;
+    const nameHero= req.params.name;
 
-    let heroess= heroes.filter(
-        (obj)=> obj.name.toLowerCase().replace(" ", ""))===name.toLowerCase();
+    let heroess= superHeroes.find(
+        (obj)=> obj.name.toLowerCase().replace(" ", ""))===nameHero.toLowerCase();
     if (heroess) {
         const newPower = req.body.power;
         heroess.power.push(newPower);
@@ -82,7 +110,7 @@ app.patch('/heroes/:name/power',(req,res)=>{
     })
     }
 });
-function transformName(req,res, next){
+function transformName(req,_res, next){
     if (req.body.name === undefined) {
         error:"add name"
     }
@@ -90,11 +118,11 @@ function transformName(req,res, next){
     next();
 }
 
-app.get('*', function(req, res) {
+app.get('*', function(_req, res) {
     res.send('All routes - Erreur 404');
 });
 
 //app listener
-app.listen(PORT, () => {
-    console.log(`Server started on port:  ${PORT}`);
+app.listen(process.env.PORT, () => {
+    console.log(`Server started on port`);
   });
