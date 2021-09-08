@@ -2,48 +2,66 @@ const express =require('express');
 const router = express.Router();
 
 // const expressValidator = require("express-validator");
+//dotenv
+const dotenv = require("dotenv");
+dotenv.config({
+	path: "../config.env",
+});
+const mongoose = require("mongoose");
 
-users= [
-    {
-        name: "Peter",
-        e_mail: "Andrews@gmail.com",
-        nationality: "UK",
-    },
-    {
-        name: "Sandra",
-        surname: "bullocks@gmail.com",
-        nationality: "UK",
-    },
-]
+//connetion to mongoose
+mongoose
+	.connect(process.env.DB, {
+		useNewUrlParser: true,
+	})
+	.then(() => {
+		console.log("Connected to MongoDB !");
+	});
 
-const user =(req, res) => {
+  //Mongoose Schema 
+  const UserSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      required: true,
+    },
+    e_mail:{
+        type:String,
+    },
+    nationality:{
+        type : String,
+    },    
+  });
+  const UserController = mongoose.model("UserController", UserSchema);
+  
+//get 
+const user = async (_req, res) => {
+
 	res.json({
 		status: "OK",
 		message: "No users yet",
 	})       
 }
-
-const addUser= (req, res) => {
-    const addUser1 = req.body;
+//post
+const addUser= async (req, res) => {
+   await UserController.create(req.body);
+   
 	res.json({
 		status: "OK",
 		message: "User added ",
-        data: addUser1,
+        data: req.body,
 	});
-    console.log(addUser)
-    }
-
-    const randomUserName =(req, res) => {
-        const name= req.params.name;
-        let user1= users.filter(a => a.name===name);
+}
+//get by name    
+    const randomUserName = async (req, res) => {
+        const name1= await UserController.findOne({name : req.params.name});
       res.json({
           status : 'ok',
-          data: [user1],
+          data: name1,
       })
     };
-
-    const id =(req,res)=> {
-        const idUser= req.params.id;
+//get by id path/id/:id
+    const id =async (req,res)=> {
+        const idUser= await UserController.findById(req.params.id);
         res.json({
                 status: "ok",
                 data: idUser,

@@ -5,10 +5,10 @@ const usersController = require('../controllers/usersController')
 // ici, on est dans /users
 router.get("/", usersController.user);
 
-router.post("/users", usersController.addUser);
+router.post("/", usersController.addUser);
 
-router.get("/users/:userName", usersController.randomUserName);
+router.get("/:userName", usersController.randomUserName);
 
-router.get("/users/id/:id", usersController.id);
+router.get("/id/:id", usersController.id);
 
 module.exports = router;
