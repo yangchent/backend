@@ -52,71 +52,74 @@ mongoose
       required: true,
     },
     power:{
-      type: String,
+        type:[String],
     },
+    color: {
+        type: String,
+    },    
+    isAlive:{
+        type:Boolean,
+    }, 
+    age: {
+        type: Number,
+    },
+    image:{
+        type : String,
+    },    
   });
   const Hero = mongoose.model("Hero", HeroSchema);
-// Middlewares globaux
+
+  // Middlewares globaux
 app.use(debug);
 
-app.get('/heroes', (_req, res) =>{
+app.get('/', async (_req, res) =>{
+    const heros= await Hero.find()
     res.json({
         status: 'ok',
-        data: superHeroes});
+        data: heros});
 });
   
-app.get('/heroes/:name',(req, res)=> {
-    const nameHero= req.params.name;
-
-    const hero= superHeroes.find(
-        (obj)=> obj.name.toLowerCase().replace(" ", "")) === nameHero.toLowerCase();
+app.get('/heroes/:name', async (req, res)=> {
+    const heros= await Hero.findOne({name :req.params.name})
+    
       res.json({
           status : 'ok',
-          data:hero,
+          data: heros,
       })
     });
     
-app.get('/heroes/:name/power',(req, res) =>{
-    const nameHero= req.params.name;
-    const hero= superHeroes.find(
-        (obj)=> obj.name.toLowerCase().replace(" ", ""))===nameHero.toLowerCase();
+app.get('/heroes/:name/power', async (req, res) =>{
+    const heros= await Hero.findOne({name :req.params.name})
+            
       res.json({
           status : 'ok',
-          HeroName: hero,
-          data: hero.power,
+          HeroName: heros.name,
+          data: heros.power,
       })
-      
     });
 
-app.post('/heroes', transformName, (req, res)=> {
-    const request1= req.body;
-    superHeroes.push(request1);
-    console.log(request1)
+app.post('/heroes', async (req, res)=> {
+    await Hero.create(req.body);
+    
    res.json({message : 'ok heros, ajouté'})
 
   });   
-app.patch('/heroes/:name/power',(req,res)=>{
-    const nameHero= req.params.name;
+  
+  
+  // `doc` is the document _after_ `update` was applied because of
+  // `new: true`
+  
+app.patch('/heroes/:name/power', async (req,res)=>{
+    const heroName =  req.params.name;
+    const newPower = req.body.power;
 
-    let heroess= superHeroes.find(
-        (obj)=> obj.name.toLowerCase().replace(" ", ""))===nameHero.toLowerCase();
-    if (heroess) {
-        const newPower = req.body.power;
-        heroess.power.push(newPower);
+    await Hero.findOneAndUpdate({name : heroName }, { $push: { power: newPower } })
     res.json({
         status : "ok",
         message :"Pouvoir ajouté!",
-        data : heroess,
+        data : newPower,
     })
-    }
-});
-function transformName(req,_res, next){
-    if (req.body.name === undefined) {
-        error:"add name"
-    }
-    req.body.name =req.body.name.toLowerCase();
-    next();
-}
+    })
 
 app.get('*', function(_req, res) {
     res.send('All routes - Erreur 404');
