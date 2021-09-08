@@ -9,6 +9,7 @@ app.use("/hotels", hotelRouter);
 
 app.use("/restaurants",restaurantRouter );
 
-app.listen(3001, () => {
-    console.log('Server listening....');
-  });
+//app listener
+app.listen(process.env.PORT, () => {
+  console.log(`Server started on port 3000..`);
+});

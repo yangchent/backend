@@ -1,81 +1,80 @@
 const express =require('express');
+    //dotenv
+const dotenv = require("dotenv");
+dotenv.config({
+	path: "../config.env",
+});
+const mongoose = require("mongoose");
 
+//connetion to mongoose
+mongoose
+	.connect(process.env.DB, {
+		useNewUrlParser: true,
+	})
+	.then(() => {
+		console.log("Connected to MongoDB !");
+	});
 
-const hotels= [
-    {
-		"id": 1,
-		"name": "Imperial Hotel",
-		"address": "84 av des Champs-Élysées",
-		"city": "Paris",
-		"country": "France",
-		"stars": 5,
-		"hasSpa": true,
-		"hasPool": true,
-		"priceCategory": 3
-	},
-    {
-		"id": 2,
-		"name": "The Queen",
-		"address": "3 Darwin Street",
-		"city": "London",
-		"country": "England",
-		"stars": 4,
-		"hasSpa": true,
-		"hasPool": false,
-		"priceCategory": 3
-	},
-	{
-		"id": 3,
-		"name": "Kiwi land",
-		"address": "4587 George St.",
-		"city": "Auckland",
-		"country": "New-Zealand",
-		"stars": 3,
-		"hasSpa": false,
-		"hasPool": true,
-		"priceCategory": 2
-	}
-]
+  //Mongoose Schema 
+  const HotelSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      required: true,
+    },
+    address:{
+        type: String,Number
+    },
+    city: {
+        type: String,
+    },    
+    country:{
+        type:String,
+    }, 
+    stars: {
+        type: Number,
+    },
+    hasSpa:{
+        type : Boolean,
+    },   
+    hasPool: {
+        type: Boolean
+    },
+    priceCategory : Number
+  });
+  const Hotel = mongoose.model("Hotel", HotelSchema);
+
 //hotel list
-const getHotels =(_req, res) => {
+const getHotels = async (_req, res) => {
+    const hotels = await Hotel.find()
 	res.json({
 		status: "OK",
 		data: hotels,
 	})       
 }
 //hotel :id
-const hotelId =(req, res) => {
-    // const parId= parseInt(req.params.id);
-    // let hotel1= hotels.find(a => a.id === parId);
-    //2nd option:
-    parId= req.params.id
+const hotelId = async(req, res) => {
+    const hotel = await Hotel.findById(req.params.id);
         res.json({
             status : 'ok',
-            data: hotels[parId -1],
+            data: hotel,
         })
 };
-// Add a hotel
-const addHotel= (req, res) => {
-    const addHotel1 = req.body;
-    hotels.push(addHotel1);
+// Add a hotel POST
+const addHotel= async (req, res) => {
+    const add1 = await Hotel.create(req.body) ;
+    
         res.json({
             status: "OK",
             message: "Hotel added ",
-            data: addHotel1,
+            data: add1,
         });
     }
-//put hotel
-   const putId =(req,res)=> {
+//put To change hotel name using /:id
+   const putId = async (req,res)=> {
 
-    const name1 =req.query.name;
     const idHotel= req.params.id;
-
-        const hotelId = hotels.findIndex(hotel => hotel.id === parseInt(idHotel));
-          
-            const hotelIndex= hotels[hotelId+1] ;
-            hotelIndex.name= name1;
-        
-         hotels.splice( hotelId,1,hotelIndex)
+    const name1 =req.query.name;
+        const hotelId = await Hotel.findOneAndUpdate({idHotel, name :name1});
            
             res.json({
                 status: "ok",
@@ -83,19 +82,17 @@ const addHotel= (req, res) => {
                 data : hotelId
             })
     }
-//Delete hotel by id
-    const deleteHotel =(req, res) => {
+//Delete hotel by id::id
+    const deleteHotel = async(req, res) => {
 
         const idHotel= req.params.id;
-
-    const hotelId = hotels.findIndex(hotel => hotel.id === parseInt(idHotel));
       
-      hotels.splice(hotelId, 1);
+      await Hotel.findByIdAndDelete(idHotel);
 
         res.json({
             status : 'ok',
-            message: "hotel name deleted",
-            data: hotels
+            message: "hotel deleted",
+            data: idHotel
         })
     };
 module.exports = {
