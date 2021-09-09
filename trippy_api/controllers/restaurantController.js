@@ -1,101 +1,83 @@
-const express =require('express');
-const restaurants =
-[
-	{
-		"id": 1,
-		"name": "Les trois Mousquetaires",
-		"address": "22 av des Champs-Élysées",
-		"city": "Paris",
-		"country": "France",
-		"stars": 4,
-		"cuisine": "french",
-		"priceCategory": 3
-	},
-	{
-		"id": 2,
-		"name": "The Fat Guy",
-		"address": "47 Jackson Boulevard",
-		"city": "New York",
-		"country": "US",
-		"stars": 5,
-		"cuisine": "burger",
-		"priceCategory": 1
-	},
-	{
-		"id": 3,
-		"name": "Veggies",
-		"address": "77 Avenir Street",
-		"city": "Sydney",
-		"country": "Australia",
-		"stars": 5,
-		"cuisine": "vegan",
-		"priceCategory": 2
-	}
-];
+//dotenv
+const dotenv = require("dotenv");
+dotenv.config({
+    path: "../config.env",
+});
+
+//mongoose
+const mongoose = require("mongoose");
+
+mongoose
+.connect(process.env.DB,{
+    useNewUrlParser: true,
+})
+.then(() => {
+    console.log("Connected to MongoDB !");
+});
+
+//Schema
+const RestaurantSchema= new mongoose.Schema({
+    name: {
+        type : String,
+        required: true,
+    },
+	address:{
+        type: String,Number //number comes after String
+    },
+    city: {type : String},
+	country:{type : String},
+	stars:{type: Number } ,
+	cuisine:{type: String},
+	priceCategory:{type: Number } 
+});
+const Restaurant = mongoose.model("Restaurant" , RestaurantSchema)
+
 //Restaurant list
-const getRestaurants =(_req, res) => {
-	res.json({
-		status: "OK",
-		data: restaurants
-	})       
+const getRestaurants = async(_req, res) => {
+    const restauList = await Restaurant.find()
+        res.json({
+            status: "OK",
+            data: restauList
+        })       
 }
 //restaurant :id
-const restaurantId =(req, res) => {
-    // const parId= parseInt(req.params.id);
-    // let restau1= restaurants.find(a => a.id === parId);
-    //2nd option:
-    parId= req.params.id
+const restaurantId = async (req, res) => {
+    const restaurant= await Restaurant.findById(req.params.id)
         res.json({
             status : 'ok',
-            data: restaurants[parId -1],
+            data: restaurant
         })
 };
 // Add a restaurant
-const addRestaurant= (req, res) => {
-    const addRes = req.body;
-    restaurants.push(addRes);
+const addRestaurant= async (req, res) => {
+    const addRes = await Restaurant.create(req.body);
         res.json({
             status: "OK",
-            message: "Hotel added ",
+            message: "Restaurants added ",
             data: addRes,
         });
     }
 //put restaurant
-   const putId =(req,res)=> {
-
-    const name1 =req.query.name;
-    const idRestau= req.params.id;
-
-        const resId = restaurants.findIndex(restaurant => restaurant.id === parseInt(idRestau));
-          
-            const resIndex= restaurants[resId+1] ;
-            resIndex.name= name1;
-        
-         hotels.splice( resId,1,resIndex)
-           
-            res.json({
-                status: "ok",
-                message: "Restaurant name changed",
-                data : resId
-            })
+   const putId = async (req,res)=> {
+    
+    const restauName = await Restaurant.findByIdAndUpdate({ _id: req.params.id },{ name : req.query.name });
+        res.json({
+            status: "ok",
+            message: "Restaurant name changed",
+            data : restauName
+        })
     }
 //Delete Restaurant by id
-    const deleterestaurant =(req, res) => {
+    const deleterestaurant = async(req, res) => {
 
         const idRes= req.params.id;
-
-    const restaurantId = restaurants.findIndex(rest => rest.id === parseInt(idRes));
-      
-      restaurants.splice(restaurantId, 1);
-
+            await Restaurant.findOneAndDelete(idRes)
         res.json({
             status : 'ok',
-            message: "Restaurant name deleted",
-            data: restaurants
+            data: idRes,
+            message: "Restaurant deleted",
         })
     };
-
-
 
 module.exports = {
 	getRestaurants: getRestaurants,

@@ -1,5 +1,5 @@
 const express =require('express');
-    //dotenv
+//dotenv
 const dotenv = require("dotenv");
 dotenv.config({
 	path: "../config.env",
@@ -46,10 +46,10 @@ mongoose
 //hotel list
 const getHotels = async (_req, res) => {
     const hotels = await Hotel.find()
-	res.json({
-		status: "OK",
-		data: hotels,
-	})       
+        res.json({
+            status: "OK",
+            data: hotels,
+        })       
 }
 //hotel :id
 const hotelId = async(req, res) => {
@@ -72,9 +72,7 @@ const addHotel= async (req, res) => {
 //put To change hotel name using /:id
    const putId = async (req,res)=> {
 
-    const idHotel= req.params.id;
-    const name1 =req.query.name;
-        const hotelId = await Hotel.findOneAndUpdate({idHotel, name :name1});
+        const hotelId = await Hotel.findByIdAndUpdate({_id : req.params.id },{name :req.query.name} );
            
             res.json({
                 status: "ok",
@@ -82,7 +80,7 @@ const addHotel= async (req, res) => {
                 data : hotelId
             })
     }
-//Delete hotel by id::id
+//Delete hotel by id/:id
     const deleteHotel = async(req, res) => {
 
         const idHotel= req.params.id;
