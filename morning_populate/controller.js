@@ -1,12 +1,8 @@
-const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config({
     path: "../config.env",
 });
 const mongoose= require("mongoose");
-const app = express();
-
-app.use(express.json());
 
 //mongoDB connection
 mongoose.connect(process.env.DB, {
@@ -45,21 +41,47 @@ const AddressSchema = new mongoose.Schema({
 const Student = mongoose.model("Student", StudentSchema);
 const Address = mongoose.model("Address", AddressSchema);
 
-app.post("/addresses", async (req, res) => {
+const addAddresses= async (req, res) => {
 	await Address.create(req.body);
 
 	res.json({
 		message: "OK",
 	});
-});
-app.post("/students", async (req, res) => {
+};
+const addStudents = async (req, res) => {
 	await Student.create(req.body);
 
 	res.json({
 		message: "OK",
 	});
-});
+};
+const getStudentDetail=async (_req, res)=>{
+    try {
+        const student= await Student.find().populate('address')
+    res.json({
+        message: "OK",
+        data: student,
+    });
+}
+catch(err){
+    res.status(404).json({
+        message: err,
+    })
+}
+};
+// function saveData(student, address){
 
-app.listen(process.env.PORT,()=> {
-    console.log("Listening on port 3000")
-})
+//     app.post('/students/:id',async  (req,res) => {
+//         student= await Student.findById(req.params.id)
+//         res.json({
+//             status: "ok",
+//             data : student
+//         })
+//     })
+// }
+
+module.exports = {
+    addAddresses: addAddresses,
+    addStudents: addStudents,
+    getStudentDetail: getStudentDetail
+}
